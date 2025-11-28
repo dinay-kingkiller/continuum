@@ -1,0 +1,282 @@
+\documentclass{amsart}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{algorithm, algpseudocode}
+\usepackage{graphicx}
+\usepackage{placeins}
+% Begin Definitions
+\newcommand{\lxor}{\otimes}
+\newcommand{\comp}{\backslash}
+\newcommand{\union}{\cup}
+% Custom Proof environment to allow cases
+\expandafter\let\expandafter\oldproof\csname\string\proof\endcsname
+\let\oldendproof\endproof
+\renewenvironment{proof}[1][\proofname]{%
+  \setcounter{case}{0}
+  \setcounter{step}{0}
+  \oldproof[#1]%
+}{\oldendproof}
+% Changes the header to \partmark{Part Title}
+\newcommand{\partmark}[1]{\markboth{\MakeUppercase{#1}}{\MakeUppercase{#1}}}
+% Theorem
+\theoremstyle{plain}
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem*{definition*}{Definition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{example}{Example}
+\newtheorem{case}{Case}
+\newtheorem*{case*}{Case}
+\newtheorem{step}{Step}
+
+
+\title{Continuous Media via Discrete Fields}
+\begin{document}
+\maketitle
+\section{Discrete Calculus}
+\subsection{Difference Equations}
+\begin{definition}
+  Let $\{t^n\}$ and $\{x_i\}$ be uniform grids in time and space with spacings $\Delta t$ and $\Delta x$, respectively.
+  For a discrete field $u$, define $u^n_i := u(t^n, x_i)$.
+  A discrete evolution law is an equation of the type
+  \begin{align*}
+    u^{n+1}_i = F(u^n_i, u^{n-1}_i, \dots),
+  \end{align*}
+  which specifies the state of the system at time $t^{n+1}$ as a function of earlier states.
+\end{definition}
+
+\begin{definition}
+  The discretization of the first derivative follows directly from the definition of a derivative. The \emph{forward difference} approximation is 
+  \begin{align*}
+    \frac{u_{i+1}-u_i}{\Delta x} \approx \frac{du}{dx},
+  \end{align*}
+  and the \emph{backward difference} approximation is
+  \begin{align*}
+    \frac{u_i-u_{i-1}}{\Delta x} \approx \frac{du}{dx}.
+  \end{align*}
+\end{definition}
+
+\begin{theorem}
+  The second derivative of $u$ can be discretized by the finite difference
+  \begin{align*}
+    \frac{u_{i+1}-2u_i+u_{i-1}}{\Delta x^2} \approx \frac{d^2u}{dx^2}
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  Recall the forward difference approximation to the first derivative
+  \begin{align*}
+    \left(\frac{du}{dx}\right)_i &\approx \frac{u_{i+1}-u_i}{\Delta x}.
+  \end{align*}
+  The second derivative is the backward difference of this quantity
+  \begin{align*}
+    \frac{d^2u}{dx^2}:=\frac{d}{dx} \left(\frac{du}{dx}\right)_i &\approx \frac{\left(\frac{du}{dx}\right)_i-\left(\frac{du}{dx}\right)_{i-1}}{\Delta x}.
+  \end{align*}
+  Substituting the forward difference into this expression gives
+  \begin{align*}
+    \frac{d^2u}{dx^2} \approx \frac{\frac{u_{i+1}-u_i}{\Delta x}-\frac{u_i-u_{i-1}}{\Delta x}}{\Delta x} =\frac{u_{i+1}-2u_i+u_{i-1}}{\Delta x^2}.
+  \end{align*}
+\end{proof}
+
+\subsection{Von Neumann Analysis}
+\begin{definition}
+  A sequence $u^n$ is \emph{stable} if there exists a constant $C>0$, independent of $n$, such that for all $n$,
+  \begin{align*}
+    \|u^n\| \leq C \|u^0\|
+  \end{align*}
+\end{definition}
+
+\begin{definition}
+  A \emph{finite-width stencil} with half-width $m$ and constant coefficients can be written as a scheme of the form
+  \begin{align*}
+    u_i^{n+1} = \sum^m_{j=-m} a_j u^n_{i+j}
+  \end{align*}
+\end{definition}
+
+\begin{theorem}
+  Consider a constant-coefficient, finite-width stencil on a uniform grid with spacing $\Delta x$:
+  \begin{align*}
+    u_i^{n+1} = \sum_{j=-m}^m a_j u_{i+j}^n.
+  \end{align*}
+  For all real wavenumber $k$, the discrete Fourier mode
+  \begin{align*}
+    u_i^n = \hat{u}^n e^{ik i \Delta x}
+  \end{align*}
+  satisfies
+  \begin{align*}
+    \hat{u}^{n+1} = G(k) \hat{u}^n
+  \end{align*}
+  where the growth factor $G(k)$ is
+  \begin{align*}
+    G(k) = \sum^m_{j=-m} a_j e^{ik j\Delta x}.
+  \end{align*}
+\end{theorem}
+
+\begin{theorem}
+  On an infinite grid, or at interior points of a finite grid away from the boundaries, a constant-coefficient stencil is stable if and only if all Fourier modes are non-growing.
+  Equivalently,
+  \begin{align*}
+    |G(k)| \leq 1\text{ for all real }k.
+  \end{align*}
+\end{theorem}
+
+\subsection{Lagrangian Analysis}
+\begin{definition}
+  Define the discrete Lagrangian $\mathcal{L}^n$ that depends on consecutive time levels
+  \begin{align*}
+    \mathcal{L}^n = \mathcal{L}(u^{n-r}, u^{n-r+1}, \dots, u^n, \dots, u^{n+s}).
+  \end{align*}
+  Define the discrete action
+  \begin{align*}
+    \mathcal{S}[u] = \sum_n \Delta t \mathcal{L}^n.
+  \end{align*}
+\end{definition}
+
+\begin{definition}
+  A discrete field $u$ is said to satisfy the \emph{discrete principle of stationary action} if for every variation $\eta$ vanishing on the temporal and spatial boundaries,
+  \begin{align*}
+    \left. \frac{d}{d\varepsilon} \right|_{\varepsilon=0} \mathcal{S}[u + \varepsilon\eta] = 0.
+  \end{align*}
+\end{definition}
+
+\begin{theorem}[Discrete Euler-Lagrange Equation]
+  Let $\mathcal{L}^n = \mathcal{L}(u^{n+1}, u^n, u^{n-1})$.
+  Then $u$ satisfies the discrete stationary condition if and only if, for every $n$,
+  \begin{align*}
+    \frac{\partial\mathcal{L}^{n+1}}{\partial u^n} +
+    \frac{\partial\mathcal{L}^n}{\partial u^n} +
+    \frac{\partial\mathcal{L}^{n-1}}{\partial u^n} = 0.
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  We introduce the varied field $v^m:=u^m+\varepsilon\eta^m$ where $\eta^m$ vanishes on the temporal boundaries. Consider the varied action
+  \begin{align*}
+    \mathcal{S}[v] = \sum_n \Delta t \mathcal{L}(v^{n+1}, v^n, v^{n-1}).
+  \end{align*}
+  Differentiate both sides by $\varepsilon$, by the multivariable chain rule
+  \begin{align*}
+    \frac{d\mathcal{S}\left[v\right]}{d\varepsilon} = \sum_n\Delta t \left(
+      \frac{\partial \mathcal{L}^n}{\partial v^{n+1}}\frac{dv^{n+1}}{d\varepsilon} +
+      \frac{\partial \mathcal{L}^n}{\partial v^n}\frac{dv^n}{d\varepsilon} +
+      \frac{\partial \mathcal{L}^n}{\partial v^{n-1}}\frac{dv^{n-1}}{d\varepsilon}\right).
+  \end{align*}
+  After taking the derivatives of $v$, using the principle of stationary action, and taking where $\varepsilon=0$ implies $u=v$
+  \begin{align*}
+    \left.\frac{d\mathcal{S}\left[u+\varepsilon\eta\right]}{d\varepsilon}\right|_{\varepsilon=0} = 0  = \sum_n\Delta t \left(
+      \frac{\partial \mathcal{L}^n}{\partial u^{n+1}}\eta^{n+1} +
+      \frac{\partial \mathcal{L}^n}{\partial u^n}\eta^n +
+      \frac{\partial \mathcal{L}^n}{\partial u^{n-1}}\eta^{n-1}\right).
+  \end{align*}
+  Summing over all $n$, there are three terms that contain a factor of $\eta^n$:
+  \begin{align*}
+    n\mapsto n+1 &\Rightarrow \frac{\partial\mathcal{L}^{n+1}}{\partial u^{n+1-1}}\eta^{n+1-1},\\
+    n\mapsto n &\Rightarrow \frac{\partial\mathcal{L}^n}{\partial u^n}\eta^n,\text{ and}\\
+    n\mapsto n-1 &\Rightarrow \frac{\partial\mathcal{L}^{n-1}}{\partial u^{n-1+1}}\eta^{n-1+1}.
+  \end{align*}
+  Combining the three terms, we get the Discrete Euler-Lagrange equations
+  \begin{align*}
+    \frac{\partial\mathcal{L}^{n+1}}{\partial u^n} +
+    \frac{\partial\mathcal{L}^n}{\partial u^n} +
+    \frac{\partial\mathcal{L}^{n-1}}{\partial u^n} = 0.
+  \end{align*}
+\end{proof}
+
+\section{The Perfect Steak - The One-Dimensional Heat Equation}
+We consider the one-dimensional heat equation 
+\begin{align*}
+  \frac{\partial T}{\partial t} = \alpha\frac{\partial^2 T}{\partial y^2},
+\end{align*}
+where $T(t, y)$ is the temperature and $\alpha$ is the thermal diffusivity.
+\subsection{Discrete Scheme}
+On a uniform grid with spacing $\Delta y$ and time step $\Delta t$, the explicit finite-difference scheme is
+\begin{align*}
+  T^{n+1}_i = T_i^n + A\left(T^n_{i+1}-2T^n_i+T^n_{i-1}\right),\quad A:=\alpha\frac{\Delta t}{\Delta y^2}.
+\end{align*}
+Boundary values $T^n_0$ and $T^n_{N_y}$ are defined by the cooking ``recipe''.
+The initial temperature $T_0$ specifies $T_i^0$.
+These boundary values are trivially stable: they are prescribed and therefore cannot grow.
+The stability of the interior points is determined by Fourier Analysis.
+\subsection{Fourier Analysis of the Scheme}
+Assume a discrete Fourier mode
+\begin{align*}
+  T_j^n=G^ne^{iky_j},\quad y_j = j\Delta y.
+\end{align*}
+Then
+\begin{align*}
+  T^n_{j\pm1} = G^n e^{ik(y_j\pm\Delta y)} = G^ne^{iky_j}e^{\pm ik\Delta y}.
+\end{align*}
+Substituting into the update rule
+\begin{align*}
+  G^{n+1}e^{iky_j} = G^ne^{iky_j}+AG^ne^{iky_j}\left(e^{ik\Delta y}-2+e^{-ik\Delta y}\right).
+\end{align*}
+Cancelling the common factor $G^ne^{iky_j}$ gives the growth factor
+\begin{align*}
+  G(k) = 1+A\left(e^{ik\Delta y}-2+e^{-ik\Delta y}\right).
+\end{align*}
+Using the trigonometric identities
+\begin{align*}
+  e^{ik\Delta y}+e^{-ik\Delta y} = 2 \cos(k\Delta y),\quad
+  \frac{1-\cos(k\Delta y)}{2}=\sin^2(\frac{k\Delta y}{2}),
+\end{align*}
+we obtain
+\begin{align*}
+  G &= 1+A(2\cos(k\Delta y)-2) = 1-4A\sin^2\left(\frac{k\Delta y}{2}\right).
+\end{align*}
+Since $\sin^2\theta\in[0,1]$, $G(k)$ ranges over the interval
+\begin{align*}
+  G\in[1-4A, 1].
+\end{align*}
+\subsection{Stability Condition}
+Von Neumann stability requires  $|G|\leq 1$ for all real wavenumbers $k$.
+The upper bound is automatic since $G(k)\leq1$.
+The nontrivial constraint is
+\begin{align*}
+  |1-4A|\leq1.
+\end{align*}
+This inequality is equivalent to
+\begin{align*}
+  -1\leq 1-4A \leq 1 \Leftrightarrow  0 \leq A \leq \frac{1}{2}
+\end{align*}
+Therefore the scheme is stable exactly when
+\begin{align*}
+  \alpha\frac{\Delta t}{\Delta y^2} \leq \frac{1}{2}
+\end{align*}
+
+\subsection{Pseudocode Implementation}
+
+\begin{algorithmic}
+  \State \Comment{Initial temperature.}
+  \For{$i = 0$ to $N_y$}
+    \State $T[0, i] = T_0$
+  \EndFor
+  \State \Comment{Boundary values from the recipe.}
+  \For{$n = 0$ to $N_t$}
+    \State $T[n, 0] \gets T(n\Delta t, 0)$
+    \State $T[n, N_y] \gets T(n\Delta t, N_y\Delta y)$
+  \EndFor
+  \State \Comment{Explicit diffusion step.}
+  \For{$n = 0$ to $N_t-1$}
+    \For{$i = 1$ to $N_y-1$}
+      \State $T[n+1, i] \gets T[n, i] + A(T[n, i+1] - 2T[n, i] + T[n, i-1])$
+    \EndFor
+  \EndFor
+\end{algorithmic}
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{steak.png}
+  \caption{Reverse Seared Steak}
+  \label{fig:steak}
+\end{figure}
+\FloatBarrier
+\section{A Guitar String - The One-Dimensional Wave Equation}
+%% TODO: Next section is about the one dimensional wave equation which will be converted into a two dimensional equation using velocities.
+\begin{align*}
+  \frac{\partial^2 y}{\partial t^2} = c^2\frac{\partial^2 y}{\partial x^2}
+\end{align*}
+
+
+\end{document}
