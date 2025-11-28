@@ -4,10 +4,6 @@
 \usepackage{graphicx}
 \usepackage{placeins}
 % Begin Definitions
-\DeclareMathOperator{\mesh}{mesh}
-\newcommand{\dif}{\mathrm{d}}
-\newcommand{\Dif}{\mathrm{D}}
-\newcommand{\lequiv}{:\Leftrightarrow}
 \newcommand{\lxor}{\otimes}
 \newcommand{\comp}{\backslash}
 \newcommand{\union}{\cup}
@@ -57,32 +53,32 @@
 \begin{definition}
   The discretization of the first derivative follows directly from the definition of a derivative. The \emph{forward difference} approximation is 
   \begin{align*}
-    \frac{u_{i+1}-u_i}{\Delta t} \approx \frac{du}{dt},
+    \frac{u_{i+1}-u_i}{\Delta x} \approx \frac{du}{dx},
   \end{align*}
   and the \emph{backward difference} approximation is
   \begin{align*}
-    \frac{u_i-u_{i-1}}{\Delta t} \approx \frac{d u}{dt}.
+    \frac{u_i-u_{i-1}}{\Delta x} \approx \frac{du}{dx}.
   \end{align*}
 \end{definition}
 
 \begin{theorem}
-  The second derivative of $u$ can be discretized as approximated by the finite difference
+  The second derivative of $u$ can be discretized by the finite difference
   \begin{align*}
-    \frac{u_{i+1}-2u_i+u_{i-1}}{\Delta t^2} \approx \frac{d^2u}{dt^2}
+    \frac{u_{i+1}-2u_i+u_{i-1}}{\Delta x^2} \approx \frac{d^2u}{dx^2}
   \end{align*}
 \end{theorem}
 \begin{proof}
-  Recall the forward difference approximation to the first derivaitive
+  Recall the forward difference approximation to the first derivative
   \begin{align*}
-    \left(\frac{du}{dt}\right)_i &\approx \frac{u_{i+1}-u_i}{\Delta t}. 
+    \left(\frac{du}{dx}\right)_i &\approx \frac{u_{i+1}-u_i}{\Delta x}.
   \end{align*}
-  The second derivative is the backwards difference of this quantity
+  The second derivative is the backward difference of this quantity
   \begin{align*}
-    \frac{d^2u}{dt^2}:=\frac{d}{dt} \left(\frac{du}{dt}\right)_i &\approx \frac{\left(\frac{du}{dt}\right)_i-\left(\frac{du}{dt}\right)_{i-1}}{\Delta t}.
+    \frac{d^2u}{dx^2}:=\frac{d}{dx} \left(\frac{du}{dx}\right)_i &\approx \frac{\left(\frac{du}{dx}\right)_i-\left(\frac{du}{dx}\right)_{i-1}}{\Delta x}.
   \end{align*}
   Substituting the forward difference into this expression gives
   \begin{align*}
-    \frac{d^2u}{dt^2} \approx \frac{\frac{u_{i+1}-u_i}{\Delta t}-\frac{u_i-u_{i-1}}{\Delta t}}{\Delta t} =\frac{u_{i+1}-2u_i+u_{i-1}}{\Delta t^2}.
+    \frac{d^2u}{dx^2} \approx \frac{\frac{u_{i+1}-u_i}{\Delta x}-\frac{u_i-u_{i-1}}{\Delta x}}{\Delta x} =\frac{u_{i+1}-2u_i+u_{i-1}}{\Delta x^2}.
   \end{align*}
 \end{proof}
 
@@ -95,7 +91,7 @@
 \end{definition}
 
 \begin{definition}
-  A \emph{finite-width stencil} with half-width $m$ and constant coefficients can be written is a scheme of the form
+  A \emph{finite-width stencil} with half-width $m$ and constant coefficients can be written as a scheme of the form
   \begin{align*}
     u_i^{n+1} = \sum^m_{j=-m} a_j u^n_{i+j}
   \end{align*}
@@ -121,7 +117,8 @@
 \end{theorem}
 
 \begin{theorem}
-  On an infinite grid, or at interior points of a finite grid away from the boundaries, the scheme is stable if the Fourier mode is non-growing a constant-coefficient stencil is stable if and only if all Fourier modes are non-growing. Equivalently,
+  On an infinite grid, or at interior points of a finite grid away from the boundaries, a constant-coefficient stencil is stable if and only if all Fourier modes are non-growing.
+  Equivalently,
   \begin{align*}
     |G(k)| \leq 1\text{ for all real }k.
   \end{align*}
@@ -210,7 +207,7 @@ Assume a discrete Fourier mode
 \end{align*}
 Then
 \begin{align*}
-  T^n_{i\pm1} = G^n e^{ik(y_j\pm\Delta y} = G^ne^{iky_j}e^{\pm ik\Delta y}.
+  T^n_{j\pm1} = G^n e^{ik(y_j\pm\Delta y} = G^ne^{iky_j}e^{\pm ik\Delta y}.
 \end{align*}
 Substituting into the update rule
 \begin{align*}
@@ -223,11 +220,11 @@ Cancelling the common factor $G^ne^{iky_j}$ gives the growth factor
 Using the trigonometric identities
 \begin{align*}
   e^{ik\Delta y}+e^{-ik\Delta y} = 2 \cos(k\Delta y),\quad
-  \frac{1-\cos(k\Delta y)}{2}=\sin^2(k\Delta y),
+  \frac{1-\cos(k\Delta y)}{2}=\sin^2(\frac{k\Delta y}{2}),
 \end{align*}
 we obtain
 \begin{align*}
-  G &= 1+A(2\cos(k\Delta x)-2) = 1-4A\sin^2\left(\frac{k\Delta x}{2}\right).
+  G &= 1+A(2\cos(k\Delta y)-2) = 1-4A\sin^2\left(\frac{k\Delta y}{2}\right).
 \end{align*}
 Since $\sin^2\theta\in[0,1]$, $G(k)$ ranges over the interval
 \begin{align*}
@@ -242,7 +239,7 @@ The nontrivial constraint is
 \end{align*}
 This inequality is equivalent to
 \begin{align*}
-  -1\leq 1-4A \leq 1 \Leftrightarrow  0 \geq A \geq \frac{1}{2}
+  -1\leq 1-4A \leq 1 \Leftrightarrow  0 \leq A \leq \frac{1}{2}
 \end{align*}
 Therefore the scheme is stable exactly when
 \begin{align*}
