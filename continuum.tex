@@ -207,7 +207,7 @@ Assume a discrete Fourier mode
 \end{align*}
 Then
 \begin{align*}
-  T^n_{j\pm1} = G^n e^{ik(y_j\pm\Delta y} = G^ne^{iky_j}e^{\pm ik\Delta y}.
+  T^n_{j\pm1} = G^n e^{ik(y_j\pm\Delta y)} = G^ne^{iky_j}e^{\pm ik\Delta y}.
 \end{align*}
 Substituting into the update rule
 \begin{align*}
@@ -256,7 +256,7 @@ Therefore the scheme is stable exactly when
   \State \Comment{Boundary values from the recipe.}
   \For{$n = 0$ to $N_t$}
     \State $T[n, 0] \gets T(n\Delta t, 0)$
-    \State $T[n, N_y] \gets T(n\Delta t, L)$
+    \State $T[n, N_y] \gets T(n\Delta t, N_y\Delta y)$
   \EndFor
   \State \Comment{Explicit diffusion step.}
   \For{$n = 0$ to $N_t-1$}
